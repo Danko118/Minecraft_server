@@ -1,7 +1,9 @@
 from crypt import methods
 import os
 import json
-from flask import Flask , send_file
+from urllib import request
+import jwt
+from flask import Flask , send_file, request , Response
 
 host = "http://0.0.0.0:8080"
 cores_dir = os.path.abspath(__file__).replace("Flask.py","core")
@@ -15,7 +17,18 @@ def downloadUrl(versionname):
 
 @app.route("/auth",methods=["POST"])
 def auth():
-    return "200, OK"
+    values = dict(request.form)
+    if len(values) == 0:
+        return Response("Empty request" , status=400)
+    correct_request = False
+    if "token" in values.keys():
+        correct_request = True
+    if ("login" in values.keys()) and ("password" in values.keys()):
+        correct_request = True
+    if correct_request:
+        return Response("OK" , status=200)
+    else:
+        return Response("Bad request" , status=400)
 
 @app.route("/version/<path:versionname>/download/core",methods=["GET"])
 def download_core(versionname):
