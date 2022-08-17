@@ -4,13 +4,19 @@ import json
 from urllib import request
 import jwt
 from flask import Flask , send_file, request , Response
+from flask_cors import CORS
 
 host = "http://0.0.0.0:8080"
+jwt_key = "123mysecretpassword123"
 cores_dir = os.path.abspath(__file__).replace("Flask.py","core")
 json_dir = os.path.abspath(__file__).replace("Flask.py","json")
 dir_files = os.listdir(cores_dir)
 
+#Temp values
+token = "123213123123123"
+
 app = Flask(__name__)
+CORS(app, supports_credentials=True)
 
 def downloadUrl(versionname):
     return host + "/version/" + versionname + "/download/"
@@ -20,15 +26,13 @@ def auth():
     values = dict(request.form)
     if len(values) == 0:
         return Response("Empty request" , status=400)
-    correct_request = False
     if "token" in values.keys():
-        correct_request = True
+        if int(values["token"]) == token:
+            return Response("OK",status=200)
     if ("login" in values.keys()) and ("password" in values.keys()):
-        correct_request = True
-    if correct_request:
-        return Response("OK" , status=200)
-    else:
-        return Response("Bad request" , status=400)
+        resp = Response('{"token":' + token + '}',status=200)
+        return resp
+    return Response("Bad request" , status=400)
 
 @app.route("/version/<path:versionname>/download/core",methods=["GET"])
 def download_core(versionname):
